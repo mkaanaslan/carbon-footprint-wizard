@@ -37,12 +37,12 @@ After these steps complete, the Gradio interface will launch and you can start u
 
 ## Project Structure
 
-- `main.py`: Application entry point and UI setup
-- `data_handler.py`: Database interaction and data processing
 - `data_preprocessing.py`: Database setup and preprocessing
-- `extraction.py`: Natural language processing for ingredient extraction
-- `llm_loop.py`: Chat interface and result generation
+- `data_handler.py`: Database interaction and data querying
+- `extraction.py`: LLM for ingredient extraction
 - `product_search.py`: Semantic search implementation
+- `llm_loop.py`: Chat interface and result generation
+- `main.py`: Application entry point and UI setup
 
 ## Data Sources
 
