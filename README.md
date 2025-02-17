@@ -1,4 +1,4 @@
-# Carbon Footprint Wizard 🌱
+# The Carbon Footprint Wizard 🌱
 
 The Carbon Footprint Wizard is an interactive tool that helps users calculate and understand the environmental impact of their recipes and meals. By leveraging multiple life cycle assessment (LCA) databases and advanced natural language processing, it provides detailed carbon footprint analyses of ingredients and cooking processes.
 
