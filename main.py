@@ -35,7 +35,7 @@ def process_recipe(recipe_input):
         df.columns = ['Ingredient', 'Amount (grams)']
         df['Ingredient'] = df['Ingredient'].str.capitalize()
 
-        ing_opts = get_similar_items(ingredients_list, encoder, vector_database)
+        ing_opts = get_similar_items(search_top_k, ingredients_list, encoder, vector_database)
         checkbox_updates = []
         for ingredient, data in ing_opts.items():
             checkbox_updates.append(

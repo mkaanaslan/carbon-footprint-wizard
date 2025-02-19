@@ -300,6 +300,13 @@ def initialize_chat(client, user_message, results_text):
 
 
 def chat_response(client, user_input, chat_history, messages):
+
+    if len(chat_history) >= 10:
+        limit_message = "I apologize, but you've reached the maximum limit of 10 messages."
+        chat_history.append((user_input, limit_message))
+        messages.append({"role": "assistant", "content": limit_message})
+        return chat_history, messages
+
     messages.append({"role": "user", "content": user_input})
 
     response = client.chat.completions.create(

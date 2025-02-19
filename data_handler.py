@@ -2,8 +2,6 @@ import numpy as np
 import pandas as pd
 import json
 from copy import deepcopy
-from product_search import search_top_k
-from bs4 import BeautifulSoup
 
 def load_data():
     with open('Data/BONSAI/bonsai_footprints.json', 'r') as f:
@@ -159,59 +157,7 @@ def round_to_sig_figs(x, sig_figs=3):
 
 
 
-def get_user_query_results_prev(ingredients_list, encoder, vector_database, country, agribalyse=agribalyse, bigclimatedata=bigclimatedata,
-                           footprints=footprints, recipes=recipes, activities=activities, locations=locations,
-                           activity_dict=activity_dict,region_dict=region_dict, unit_dict=unit_dict):
-
-    search_query = deepcopy(ingredients_list)
-    for cur_ingredients in search_query:
-        
-        query, grams = cur_ingredients.values()
-        top_k_results = search_top_k(encoder, vector_database, query, 3)
-        cur_ingredients['results'] = f"Results for selected most similar items to '{query}':\n\n"
-
-        all_options = []
-        for options in top_k_results.values():
-            all_options.extend(options)
-
-        print(f"\nAvailable products for {query}, {grams}g:")
-        for idx, option in enumerate(all_options, 1):
-            print(f"{idx}. {option}")
-
-        choices = input("Select option numbers (comma-separated, press Enter if none match): ")
-        if choices.strip():
-            indices = [int(x.strip()) - 1 for x in choices.split(",")]
-            selected = [all_options[idx] for idx in indices]
-        else:
-            cur_ingredients['results'] += f"No data available in all data sources for {query}"
-
-        filtered_results = {
-            source: [item for item in items if item in selected]
-            for source, items in top_k_results.items()
-        }
-        
-        
-        for source, name_list in filtered_results.items():
-            for product_name in name_list:
-                if source == 'BONSAI':
-                    cur_ingredients['results'] += get_bonsai_data(product_name, 'product', country, grams=grams)
-                    cur_ingredients['results'] += "\n"
-                    cur_ingredients['results'] += get_bonsai_data(product_name, 'market', country, grams=grams)
-                elif source == 'Agribalyse':
-                    cur_ingredients['results'] += get_agribalyse_data(product_name, grams=grams)
-                else:
-                    cur_ingredients['results'] += get_bigclimate_data(product_name, country, grams=grams)
-                cur_ingredients['results'] += "\n"
-        
-    results_text = ""
-    for cur_dict in search_query:
-        results_text += cur_dict['results']
-
-    return search_query, results_text
-
-
-
-def get_similar_items(ingredients_list, encoder, vector_database):
+def get_similar_items(search_top_k, ingredients_list, encoder, vector_database):
 
     search_query = deepcopy(ingredients_list)
     ingredient_options = {}
