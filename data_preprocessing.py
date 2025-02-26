@@ -7,7 +7,7 @@ from pathlib import Path
 import time
 
 BASE_URL = "https://lca.aau.dk"
-TOKEN = "32c5904c18c861beacda340895ce21ef1f53bae1"
+TOKEN = "ADD TOKEN HERE"
 HEADERS = {
     "Authorization": f"Token {TOKEN}",
     "Content-Type": "application/json"
