@@ -22,8 +22,7 @@ encoder, vector_database = create_vector_database(
 MAX_INGREDIENTS = 30
 
 
-def process_recipe(recipe_input):
-
+def process_recipe(recipe_input, target_country):
     try:
         ingredients_list = extract_ingredients(
             extract_prompt,
@@ -35,13 +34,21 @@ def process_recipe(recipe_input):
         df.columns = ['Ingredient', 'Amount (grams)']
         df['Ingredient'] = df['Ingredient'].str.capitalize()
 
-        ing_opts = get_similar_items(search_top_k, ingredients_list, encoder, vector_database)
+        ing_opts = get_similar_items(search_top_k, ingredients_list, encoder, vector_database, target_country)
         checkbox_updates = []
         for ingredient, data in ing_opts.items():
+            choices = []
+            for opt in sorted(set([opt.capitalize() for opt in data['options']])):
+                has_country_data = data['availability'].get(opt.lower(), False)
+                if has_country_data:
+                    choices.append(opt)
+                else:
+                    choices.append(f"{opt} *")  # Mark with asterisk if no country-specific data
+            
             checkbox_updates.append(
                 gr.update(
                     visible=True,
-                    choices=sorted(set([opt.capitalize() for opt in data['options']])),
+                    choices=choices,
                     label=f"{ingredient.capitalize()} ({data['amount']}g)",
                     value=None
                 )
@@ -49,9 +56,12 @@ def process_recipe(recipe_input):
         while len(checkbox_updates) < MAX_INGREDIENTS:
             checkbox_updates.append(gr.update(visible=False))
 
+        # Add explanation for asterisk
+        status_message = "✅ Ingredients successfully extracted!"
+        
         return (
             df,
-            gr.update(value="✅ Ingredients successfully extracted!"),
+            gr.update(value=status_message),
             ing_opts,
             True,
             *checkbox_updates
@@ -68,9 +78,7 @@ def process_recipe(recipe_input):
         )
     
 
-
 def process_form(*inputs):
-
     selections = inputs[:-2]
     ing_opts = inputs[-2]
     country = inputs[-1]
@@ -98,12 +106,10 @@ def process_form(*inputs):
     
 
 def create_interface():
-
     with gr.Blocks() as app:
         gr.Markdown("# The Carbon Footprint Wizard")
 
         with gr.Tabs() as tabs:
-
             with gr.Tab("Recipe Input"):
                 ingredient_options_state = gr.State({})
                 gr.Markdown("### 1) Enter Your Recipe")
@@ -133,7 +139,11 @@ def create_interface():
             with gr.Tab("Product Selection", id="products"):
                 product_selection_visible = gr.Checkbox(visible=False)
                 product_selection_mrk1 = gr.Markdown("### 2) Select Your Products", visible=False)
-                product_selection_mrk2 = gr.Markdown("*Select the most similar products for each ingredient listed. If multiple options are relevant, please choose all that apply to ensure accuracy.*", visible=False)
+                product_selection_mrk2 = gr.Markdown("""
+                *Select the most similar products for each ingredient listed. If multiple options are relevant, please choose all that apply to ensure accuracy.*
+                
+                **Note:** Items marked with an asterisk (*) don't have data specific to the selected country and will use estimates from other countries.
+                """, visible=False)
                 checkbox_groups = []
                 for i in range(MAX_INGREDIENTS):
                     checkbox = gr.CheckboxGroup(
@@ -165,7 +175,7 @@ def create_interface():
 
         submit_btn.click(
             fn=process_recipe,
-            inputs=recipe_input,
+            inputs=[recipe_input, target_country],
             outputs=[
                 ingredients_df,
                 status_md,
@@ -219,3 +229,4 @@ def create_interface():
 if __name__ == "__main__":
     demo = create_interface()
     demo.launch()
+
