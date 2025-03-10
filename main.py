@@ -1,6 +1,7 @@
 import gradio as gr
 import pandas as pd
 from data_preprocessing import process_data
+import os
 
 if not process_data():
     print("Error in data preprocessing. Exiting...")
@@ -107,7 +108,7 @@ def process_form(*inputs):
 
 def create_interface():
     with gr.Blocks() as app:
-        gr.Markdown("# The Carbon Footprint Wizard")
+        gr.Markdown("# The Carbon Footprint Wizard 🌱")
 
         with gr.Tabs() as tabs:
             with gr.Tab("Recipe Input"):
@@ -230,3 +231,11 @@ if __name__ == "__main__":
     demo = create_interface()
     demo.launch()
 
+    """
+    demo.launch(
+        share=True,
+        share_server_address="carbonfootprintwizard.labs.vu.nl:7861",
+        server_name="0.0.0.0",
+        server_port=7861
+    )
+    """
